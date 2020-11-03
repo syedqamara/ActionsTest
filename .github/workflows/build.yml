@@ -2,35 +2,7 @@ name: CI
 
 on: [push]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [10.x]
-    steps:
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - uses: actions/checkout@v1
-      - name: Install dependencies
-        run: |
-          yarn install
-      - uses: vgaidarji/android-github-actions-build@v1.0.1
-        with:
-            node-version: ${{ matrix.node-version }}
-      - name: Run Gradle command
-        run: |
-            cd ./android &&
-            ./gradlew assemble --stacktrace
-      - name: Run Webhook
-        run: |
-            curl -F "file=@./android/app/build/outputs/apk/release/app-release.apk" -X POST  https://291f3ae855ba.ngrok.io/mobilebuild/webhook/callback/5f8eab89c7105e1b1cf18acd
-      # - uses: actions/upload-artifact@v2
-      #   with:
-      #     name: app-release.apk
-      #     path: ./android/app/build/outputs/apk/release/app-release.apk
-      
+jobs: 
   build-ios:
     runs-on: macOS-10.15
     steps:
@@ -74,18 +46,18 @@ jobs:
             # certificate-password: ${{ secrets.CERT_PASSWORD }}
         - name: Build app
           run: | 
-            cd ios && xcodebuild -workspace ActionsTest.xcworkspace \
-            -scheme ActionsTest -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $PWD/build/ActionsTest.xcarchive
+            cd ios && xcodebuild -workspace ThreeDViews.xcworkspace \
+            -scheme ThreeDViews -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $PWD/build/ThreeDViews.xcarchive
           env:
             IOS_PROFILE_KEY: ${{ secrets.IOS_PROFILE_KEY }}
             # IPHONEOS_DEPLOYMENT_TARGET: 10.0 
         - name: Export app 
           run: |
-            cd ios && xcodebuild -exportArchive -archivePath $PWD/build/ActionsTest.xcarchive \
-            -exportOptionsPlist ActionsTest/Info.plist -exportPath $PWD/build
+            cd ios && xcodebuild -exportArchive -archivePath $PWD/build/ThreeDViews.xcarchive \
+            -exportOptionsPlist ThreeDViews/Info.plist -exportPath $PWD/build
         - name: Run Webhook
           run: |
-            curl -F "file=@../ios/build/ActionsTest.ipa" -X POST  https://291f3ae855ba.ngrok.io/mobilebuild/webhook/callback/5f8eab89c7105e1b1cf18acd
+            curl -F "file=@../ios/build/ThreeDViews.ipa" -X POST  https://291f3ae855ba.ngrok.io/mobilebuild/webhook/callback/5f8eab89c7105e1b1cf18acd
         # - uses: actions/upload-artifact@v2 
         #   with:    
         #     name: ActionsTest.ipa
